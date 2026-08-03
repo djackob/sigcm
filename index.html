@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Prototipo navegable del Sistema de Gestión de Contratos Menores de ANIN">
+  <title>SIGCM · ANIN</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#mainContent">Saltar al contenido</a>
+
+  <section id="loginView" class="login-view" aria-labelledby="loginTitle">
+    <div class="login-brand">
+      <div class="brand-lockup brand-lockup--light"><span class="brand-mark">A</span><span><b>ANIN</b><small>Autoridad Nacional de Infraestructura</small></span></div>
+      <div class="login-copy">
+        <span class="eyebrow eyebrow--light">Plataforma institucional</span>
+        <h1>Sistema de Gestión de Contratos Menores</h1>
+        <p>Gestión de Contratos Menores</p>
+      </div>
+      <div class="login-proof">
+        <span>✓ Acceso seguro</span><span>✓ Firma digital simulada</span><span>✓ Trazabilidad integral</span>
+      </div>
+    </div>
+
+    <div class="login-panel">
+      <div class="sso-card">
+        <div class="mobile-brand brand-lockup"><span class="brand-mark">A</span><span><b>ANIN</b><small>Autoridad Nacional de Infraestructura</small></span></div>
+        <span class="eyebrow">Sistema SGCM</span>
+        <h2 id="loginTitle">Ingrese sus credenciales</h2>
+        <p class="muted">Usa tu identidad institucional para continuar.</p>
+        <form id="loginForm">
+          <label>Correo institucional
+            <div class="input-affix"><span>＠</span><input id="email" type="email" value="maria.torres@anin.gob.pe" autocomplete="username" required></div>
+          </label>
+          <label>Perfil
+            <select id="profileSelect" required></select>
+          </label>
+          <button class="btn btn--primary btn--wide" type="submit"><span class="shield">✓</span> Continuar con SSO</button>
+        </form>
+        <div class="sso-note"><span>i</span><p><b>Entorno de prototipos</b></p></div>
+        <p class="login-help">¿Problemas para ingresar? <button class="link-button" type="button" data-toast="Se abrió una solicitud simulada a Mesa de Ayuda.">Contactar a Mesa de Ayuda</button></p>
+      </div>
+    </div>
+  </section>
+
+  <div id="appView" class="app-view" hidden>
+    <aside id="sidebar" class="sidebar" aria-label="Navegación principal">
+      <div class="sidebar-head">
+        <div class="brand-lockup brand-lockup--light"><span class="brand-mark">A</span><span><b>ANIN</b><small>Sistema SIGCM</small></span></div>
+        <button id="sidebarClose" class="icon-btn icon-btn--ghost mobile-only" aria-label="Cerrar menú">×</button>
+      </div>
+      <nav id="mainNav"></nav>
+      <div class="sidebar-foot">
+        <div class="sidebar-user"><span class="avatar">MT</span><span><b>María Torres</b><small id="sidebarRole"></small></span></div>
+        <button id="logoutBtn" class="icon-btn icon-btn--ghost" title="Cerrar sesión" aria-label="Cerrar sesión">↪</button>
+      </div>
+    </aside>
+    <div id="sidebarBackdrop" class="backdrop" hidden></div>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="menuBtn" class="icon-btn mobile-only" aria-label="Abrir menú">☰</button>
+          <div><p class="breadcrumb" id="breadcrumb">SIGCM / Mi bandeja</p><h1 id="pageTitle">Mi bandeja</h1></div>
+        </div>
+        <div class="topbar-actions">
+          <button id="profileButton" class="profile-chip"><span class="avatar">MT</span><span><b>María Torres</b><small id="topbarRole"></small></span><span>⌄</span></button>
+        </div>
+      </header>
+      <main id="mainContent" tabindex="-1"></main>
+    </div>
+
+    <dialog id="caseDialog" class="case-dialog">
+      <form method="dialog" class="dialog-close"><button class="icon-btn" aria-label="Cerrar">×</button></form>
+      <div id="caseDialogBody"></div>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
