@@ -34,11 +34,10 @@ Los datos son demostrativos y se administran mediante arreglos temporales en mem
 3. Área usuaria
 4. Oficina de administración
 5. DAI
-6. Dependencia contrataciones
-7. Planeamiento y Presupuesto
-8. Unidad de Abastecimiento
-9. Unidad de Contabilidad
-10. Unidad de Tesorería
+6. Planeamiento y Presupuesto
+7. Unidad de Abastecimiento
+8. Unidad de Contabilidad
+9. Unidad de Tesorería
 
 ## Matriz de acceso implementada
 
@@ -47,7 +46,7 @@ La normalización de mayúsculas en los nombres no cambia el contenido de la mat
 | Módulo / subproceso | Perfiles con acceso |
 |---|---|
 | Gestión CMN | Unidad de Abastecimiento; Oficina de administración; Área usuaria |
-| Requerimiento a Notificación | Área usuaria; Oficina de administración; DAI; Dependencia contrataciones; Planeamiento y Presupuesto |
+| Requerimiento a Notificación | Área usuaria; Oficina de administración; DAI; Unidad de Abastecimiento; Planeamiento y Presupuesto |
 | Pago | Proveedor; Mesa de Partes; Área usuaria; Unidad de Abastecimiento; Unidad de Contabilidad; Unidad de Tesorería |
 | Ejecución | Proveedor; Mesa de Partes; Área usuaria; Unidad de Abastecimiento |
 | Modificación-Ampliación | Proveedor; Mesa de Partes; Área usuaria; Unidad de Abastecimiento |
@@ -81,21 +80,21 @@ Para probar el circuito completo sin recargar la página, cierre la sesión y ca
 
 ### Requerimiento a Notificación
 
-El registro pregunta si la necesidad ya está incluida en el CMN. Si la respuesta es sí, solicita adjuntar el Anexo 1 firmado; si es no, muestra un acceso a Gestión CMN y exige seleccionar o adjuntar el Anexo 4 aprobado. Luego se registra el sustento y pedido SIGA y se genera el documento técnico según el objeto:
+El registro pregunta si la necesidad ya está incluida en el CMN. Si la respuesta es sí, solicita adjuntar el Anexo 1 firmado; si es no, muestra un acceso a Gestión CMN y exige seleccionar o adjuntar el Anexo 4 aprobado. En este mismo formulario se consultan datos temporales del SIGA y se acumulan uno o más pedidos, que luego se reflejan en los anexos sin volver a capturarlos. Después se genera el documento técnico según el objeto:
 
 - **Bien:** EETT, Anexo 1 (páginas 21–26).
 - **Servicio:** TDR, Anexo 2 (páginas 27–31).
-- **Locación:** TDR, Anexo 3 (páginas 32–37) y, después de firmarlo, propuesta del Área usuaria, Anexo 5 (página 42). El Anexo 5 permite acumular múltiples proveedores mediante una tarjeta de captura y una tabla dinámica; la vista final presenta conjuntamente el Anexo 3 y el Anexo 5.
+- **Locación:** primero se genera y firma la propuesta del Área usuaria, Anexo 5 (página 42), y luego se elabora y firma el TDR, Anexo 3 (páginas 32–37). Los pedidos SIGA vinculados en el requerimiento se muestran como referencia no editable y se reflejan en ambos documentos. El Anexo 5 admite múltiples proveedores, cada anexo dispone de su propio icono y visor independiente, y la indagación requiere una sola cotización válida.
 - **Consultoría:** TDR, Anexo 4 (páginas 38–41).
 
-Cada formato se completa en un formulario específico, se muestra en un visor tipo PDF y debe firmarse digitalmente antes de permitir la remisión. Después continúan las autorizaciones, revisión y subsanación, no objeción, indagación de mercado, consultas, validación técnica, CCP/previsión presupuestal, perfeccionamiento y notificación de OS/OC o contrato.
+Cada formato se completa en un formulario específico, se muestra en un visor tipo PDF y debe firmarse digitalmente antes de permitir la remisión. El formulario inicial del requerimiento también conserva un visor permanente con todos los pedidos SIGA. Sólo el Área usuaria puede editarlo mientras está en borrador o después de recepcionar observaciones; al guardar la subsanación vuelve a modo de solo lectura. Después continúan las autorizaciones, revisión y subsanación, no objeción, indagación de mercado, consultas, validación técnica, CCP/previsión presupuestal, perfeccionamiento y notificación de OS/OC o contrato.
 
 La bandeja implementa acciones específicas por perfil y dependencia competente:
 
 - **Área usuaria:** registra la necesidad, disponibilidad, inclusión CMN, pedido SIGA, EETT/TDR y anexos; subsana observaciones, responde no objeción y consultas de mercado, y valida ofertas técnicas.
-- **Oficina de administración:** interviene cuando la dependencia competente es Contrataciones; recepciona y deriva el requerimiento. No puede crear requerimientos.
+- **Oficina de administración:** cuando la DEC es la Unidad de Abastecimiento, recepciona el requerimiento del Área usuaria y lo deriva a la UA el mismo día. No crea requerimientos.
 - **DAI:** recibe directamente los requerimientos asignados a DAI y ejecuta las actuaciones de revisión, indagación, CCP, perfeccionamiento y notificación.
-- **Dependencia contrataciones:** recibe por derivación de Oficina de administración, revisa, observa o solicita no objeción, gestiona cotizaciones, cuadro comparativo, CCP, OC/OS y notificación.
+- **Unidad de Abastecimiento:** actúa como DEC para bienes, servicios y consultorías ordinarias; recibe por derivación de OA, revisa, observa o solicita no objeción, gestiona cotizaciones, cuadro comparativo, CCP, OC/OS y notificación.
 - **Planeamiento y Presupuesto:** recepciona, aprueba y remite la CCP o previsión presupuestal.
 
 Se simulan las ramas de observación y reformulación, mejoras/no objeción, consultas de mercado, falta o reiteración de cotizaciones, validación técnica, certificación presupuestal y notificación final. El expediente conserva la etapa al cambiar de perfil mientras no se recargue la página.
