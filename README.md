@@ -1,14 +1,14 @@
 # Prototipo navegable SIGCM
 
-Prototipo web local, sin backend, elaborado a partir de los 10 diagramas Bizagi ubicados en `Analisis/Flujo de Proceso - Contratacion menor a 8 UIT v 5.0` y de la Directiva N.° 002-2026-ANIN (versión 1, 52 páginas).
+Prototipo web local, sin backend, elaborado a partir de los diagramas Bizagi ubicados en `Analisis/Flujo de Proceso - Contratacion menor a 8 UIT v 5.0`, la Directiva N.° 002-2026-ANIN (versión 1, 52 páginas) y la Directiva N.° 0007-2025-EF/54.01 para la gestión del CMN. Este README documenta el comportamiento actualmente implementado y sirve como línea base para validar los flujos antes de redactar los casos de uso de implementación.
 
 ## Cómo ejecutar
 
 Opción directa:
 
-1. Abrir la carpeta `prototipado`.
+1. Abrir la carpeta `mockup/sigcm`.
 2. Hacer doble clic en `index.html`.
-3. En la pantalla SSO, elegir cualquiera de los 10 perfiles y pulsar **Continuar con SSO**.
+3. En la pantalla SSO, elegir uno de los perfiles disponibles y pulsar **Continuar con SSO**.
 
 No requiere instalación, servidor, conexión a internet ni credenciales reales. Para una prueba más cercana a producción también puede servirse la carpeta con cualquier servidor HTTP estático.
 
@@ -29,15 +29,20 @@ Los datos son demostrativos y se administran mediante arreglos temporales en mem
 
 ## Perfiles representados
 
-1. Proveedor
-2. Mesa de Partes
-3. Área usuaria
-4. Oficina de administración
-5. DAI
-6. Planeamiento y Presupuesto
-7. Unidad de Abastecimiento
-8. Unidad de Contabilidad
-9. Unidad de Tesorería
+El acceso SSO presenta 12 opciones, correspondientes a nueve grupos funcionales. El Área usuaria y la Unidad de Abastecimiento se desagregan porque sus tareas, firmas y autorizaciones no son intercambiables.
+
+1. Proveedor.
+2. Mesa de Partes.
+3. Área usuaria · Jefe.
+4. Área usuaria · Especialista.
+5. Oficina de Administración (OA).
+6. DAI.
+7. Planeamiento y Presupuesto (OPP / Unidad de Presupuesto).
+8. Unidad de Abastecimiento · Jefe.
+9. Unidad de Abastecimiento · Coordinador.
+10. Unidad de Abastecimiento · Especialista.
+11. Unidad de Contabilidad.
+12. Unidad de Tesorería.
 
 ## Matriz de acceso implementada
 
@@ -68,36 +73,104 @@ Los formularios de registro utilizan cuatro tipos de objeto o prestación: **Bie
 
 Gestión de la modificación del Cuadro Multianual de Necesidades conforme a la Directiva N.° 0007-2025-EF/54.01: generación del **Anexo 3 — Solicitud de modificación del CMN** y del **Anexo 4 — Aprobación de modificaciones al CMN**.
 
-La bandeja CMN aplica acciones específicas por perfil y etapa:
+#### Actores y responsabilidades
 
-- **Área usuaria:** registra el nuevo CMN, firma y envía el Anexo 3; recepciona observaciones, subsana y reenvía; finalmente recepciona el Anexo 4 y cierra el flujo.
-- **Oficina de administración:** no registra solicitudes; recepciona el Anexo 3 y lo deriva a la Unidad de Abastecimiento.
-- **Unidad de Abastecimiento:** recepciona y valida el Anexo 3; si tiene observaciones las notifica al Área usuaria; si está conforme genera, firma y envía el Anexo 4.
+- **Área usuaria · Especialista:** verifica la disponibilidad en SIAF, registra y sustenta el Anexo 3, administra sus ítems, atiende las observaciones y deriva el documento al Jefe cuando se requiere firma o envío externo.
+- **Área usuaria · Jefe:** firma digitalmente el Anexo 3, aprueba su envío o reenvío, recepciona formalmente las observaciones y recepciona el Anexo 4 individual o consolidado para cerrar el flujo.
+- **Oficina de Administración:** revisa el Anexo 3 firmado. Puede observarlo y devolverlo al Área usuaria o, si está conforme, derivarlo a la Unidad de Abastecimiento.
+- **Unidad de Abastecimiento:** revisa el Anexo 3, registra si la inclusión es ordinaria o urgente, formula observaciones o aprueba la solicitud. Con solicitudes conformes genera, firma y envía el Anexo 4, de manera individual o consolidada.
 
-El Anexo 3 registra Área usuaria, fecha, código, descripción, unidad de medida, cantidades y valores de exclusión/inclusión, sustento y años afectados. Su tabla de ítems es dinámica: inicia con una fila y permite agregar o retirar todas las filas necesarias. Tras validarlo, Abastecimiento completa el Anexo 4 conservando todos los ítems, además de entidad, identificación, solicitud y los dos firmantes previstos en el formato. Ambos documentos tienen visor, huella y firma digital simulada; no pueden enviarse antes de firmarse.
+#### Flujo principal implementado
+
+1. El Área usuaria registra el **Anexo 3** con su sustento y al menos un ítem.
+2. Si lo prepara el Especialista, lo deriva al Jefe. El Jefe revisa y firma digitalmente el documento.
+3. El Jefe envía el Anexo 3 a OA; el expediente queda **En evaluación OA**.
+4. OA revisa la integridad del documento:
+   - Si observa, la notificación llega al Jefe del Área usuaria.
+   - Si está conforme, deriva el expediente a la Unidad de Abastecimiento.
+5. Abastecimiento revisa el Anexo 3 y selecciona el tipo de inclusión: **Ordinario** o **Urgente**.
+6. Si Abastecimiento observa, notifica al Área usuaria. Si aprueba, el expediente queda listo para generar el Anexo 4.
+7. Abastecimiento genera y firma el **Anexo 4**. Puede procesarlo individualmente o seleccionar dos o más solicitudes conformes para generar un único Anexo 4 consolidado.
+8. Abastecimiento envía el Anexo 4 al Área usuaria. En el envío consolidado se crea una sola entrada de recepción con la referencia de todos los expedientes incluidos.
+9. El Jefe del Área usuaria recepciona el Anexo 4. La recepción finaliza la entrada consolidada y todos los expedientes relacionados.
+
+#### Observación y subsanación
+
+- OA y Abastecimiento pueden registrar el motivo de la observación.
+- El Área usuaria debe recepcionar la notificación antes de corregir.
+- La subsanación permite modificar el sustento y el contenido completo del Anexo 3.
+- Si se actualiza un Anexo 3 ya firmado, la firma anterior se invalida y el Jefe debe firmar nuevamente.
+- Una observación de OA retorna a OA después de la subsanación. Una observación de Abastecimiento retorna directamente a Abastecimiento.
+- El documento corregido no puede reenviarse hasta contar con la nueva firma del Jefe.
+
+#### Reglas y documentos CMN
+
+- Cada ítem contiene código, descripción, unidad de medida, cantidad y valor.
+- Por cada ítem se registra **exclusión o inclusión, nunca ambas**; el grupo seleccionado exige cantidad y valor completos.
+- La tabla es dinámica, pero debe conservar al menos un ítem.
+- El Anexo 3 muestra el responsable del Área usuaria y el Anexo 4 representa los dos firmantes previstos: responsable de Abastecimiento y máxima autoridad administrativa.
+- Ambos anexos disponen de visor, impresión/PDF, huella y firma digital simulada.
+- Estados principales: `Registrar Anexo 3` → `Por firmar AU` → `Firmado Anexo 3` → `En evaluación OA` → `Derivado a UA` / `En evaluación UA` → `Generar Anexo 4` → `Firmar digitalmente Anexo 4` → `Enviar Anexo 4` → `Recepcionar Anexo 4` → `Fin`.
 
 Para probar el circuito completo sin recargar la página, cierre la sesión y cambie de perfil en cada transferencia. El expediente conserva temporalmente su etapa e historial mientras la pestaña permanezca abierta.
 
 ### Requerimiento a Notificación
 
-El registro pregunta si la necesidad ya está incluida en el CMN. Si la respuesta es sí, solicita adjuntar el Anexo 1 firmado; si es no, muestra un acceso a Gestión CMN y exige seleccionar o adjuntar el Anexo 4 aprobado. En este mismo formulario se consultan datos temporales del SIGA y se acumulan uno o más pedidos, que luego se reflejan en los anexos sin volver a capturarlos. Después se genera el documento técnico según el objeto:
+El módulo cubre desde el registro de la necesidad hasta la emisión y notificación de la orden. El registro inicial captura denominación, objeto, DEC, disponibilidad presupuestal, condición CMN, monto, ATE, RUC, plazo, sustento y uno o más pedidos SIGA. Los datos presupuestales y del pedido se precargan desde un catálogo simulado; los campos derivados de SIGA son de solo lectura.
+
+Si la necesidad está incluida en el CMN se solicita el Anexo 1 firmado. Si no está incluida, se habilita el acceso a Gestión CMN y se exige seleccionar un Anexo 4 finalizado o adjuntar un Anexo 4 firmado. También se registra la evidencia del saldo disponible o de la habilitación aprobada. El monto debe ser mayor que cero y no superar ocho UIT; para 2026 el prototipo usa S/ 44 000.
+
+#### Documentos según el objeto
 
 - **Bien:** EETT, Anexo 1 (páginas 21–26).
 - **Servicio:** TDR, Anexo 2 (páginas 27–31).
-- **Locación:** primero se genera y firma la propuesta del Área usuaria, Anexo 5 (página 42), y luego se elabora y firma el TDR, Anexo 3 (páginas 32–37). Los pedidos SIGA vinculados en el requerimiento se muestran como referencia no editable y se reflejan en ambos documentos. El Anexo 5 admite múltiples proveedores, cada anexo dispone de su propio icono y visor independiente, y la indagación requiere una sola cotización válida.
+- **Locación:** primero se genera y firma la propuesta del Área usuaria, Anexo 5 (página 42), y después se elabora y firma el TDR, Anexo 3 (páginas 32–37). El Anexo 5 admite entre una y cinco propuestas; no exige una terna. Los pedidos SIGA vinculados se reflejan en ambos documentos y no se vuelven a capturar.
 - **Consultoría:** TDR, Anexo 4 (páginas 38–41).
 
-Cada formato se completa en un formulario específico, se muestra en un visor tipo PDF y debe firmarse digitalmente antes de permitir la remisión. El formulario inicial del requerimiento también conserva un visor permanente con todos los pedidos SIGA. Sólo el Área usuaria puede editarlo mientras está en borrador o después de recepcionar observaciones; al guardar la subsanación vuelve a modo de solo lectura. Después continúan las autorizaciones, revisión y subsanación, no objeción, indagación de mercado, consultas, validación técnica, CCP/previsión presupuestal, perfeccionamiento y notificación de OS/OC o contrato.
+Cada formato tiene un formulario y un visor independiente. La firma digital corresponde al **Jefe o titular del Área usuaria**; el Especialista elabora y deriva. El requerimiento inicial puede editarse mientras está en borrador o durante una subsanación formalmente recepcionada. Fuera de esas etapas funciona como visor de solo lectura.
 
-La bandeja implementa acciones específicas por perfil y dependencia competente:
+#### Actores y responsabilidades
 
-- **Área usuaria:** registra la necesidad, disponibilidad, inclusión CMN, pedido SIGA, EETT/TDR y anexos; subsana observaciones, responde no objeción y consultas de mercado, y valida ofertas técnicas.
-- **Oficina de administración:** cuando la DEC es la Unidad de Abastecimiento, recepciona el requerimiento del Área usuaria y lo deriva a la UA el mismo día. No crea requerimientos.
-- **DAI:** recibe directamente los requerimientos asignados a DAI y ejecuta las actuaciones de revisión, indagación, CCP, perfeccionamiento y notificación.
-- **Unidad de Abastecimiento:** actúa como DEC para bienes, servicios y consultorías ordinarias; recibe por derivación de OA, revisa, observa o solicita no objeción, gestiona cotizaciones, cuadro comparativo, CCP, OC/OS y notificación.
-- **Planeamiento y Presupuesto:** recepciona, aprueba y remite la CCP o previsión presupuestal.
+- **Área usuaria · Especialista:** registra la necesidad y los pedidos SIGA, elabora anexos y documentos técnicos, prepara subsanaciones, responde consultas y realiza la validación técnica.
+- **Área usuaria · Jefe:** firma los anexos y el documento técnico, aprueba el envío y reenvío, responde actuaciones que requieren la decisión del titular y valida técnicamente cuando corresponde.
+- **Oficina de Administración:** para expedientes cuya DEC es Abastecimiento, revisa el formulario y los documentos impresos. Puede observar y devolver al Área usuaria o derivar a Abastecimiento. No crea requerimientos.
+- **DAI:** recibe directamente los requerimientos que le corresponden y actúa como DEC durante la revisión, indagación, CCP, perfeccionamiento y notificación.
+- **Unidad de Abastecimiento · Especialista:** recepciona el expediente derivado por OA, efectúa la revisión inicial, conduce la indagación, recepciona la CCP aprobada y notifica la orden.
+- **Unidad de Abastecimiento · Coordinador:** decide el resultado de la revisión, gestiona observaciones/no objeción, valida la selección, elabora el Anexo 8 cuando corresponde, registra la solicitud de CCP y verifica el expediente para perfeccionamiento.
+- **Unidad de Abastecimiento · Jefe:** autoriza el perfeccionamiento y emite la OC u OS.
+- **OPP / Unidad de Presupuesto:** recepciona la solicitud, aprueba u observa la CCP o previsión presupuestal y la remite nuevamente a la DEC. OPP no aprueba el cuadro de cotizaciones.
 
-Se simulan las ramas de observación y reformulación, mejoras/no objeción, consultas de mercado, falta o reiteración de cotizaciones, validación técnica, certificación presupuestal y notificación final. El expediente conserva la etapa al cambiar de perfil mientras no se recargue la página.
+#### Flujo principal implementado
+
+1. El Especialista del Área usuaria registra el requerimiento y vincula uno o más pedidos SIGA.
+2. Se elaboran los documentos según el objeto. En Locación el orden obligatorio es **Anexo 5 → firma del Jefe → TDR Anexo 3 → firma del Jefe**.
+3. El Jefe aprueba y remite el expediente:
+   - Si la DEC es la Unidad de Abastecimiento: Área usuaria → OA → Unidad de Abastecimiento.
+   - Si la DEC es DAI: Área usuaria → DAI, sin pasar por OA.
+4. OA revisa el expediente completo, incluyendo los visores impresos. Puede observarlo o derivarlo a la Unidad de Abastecimiento.
+5. En Abastecimiento, el Especialista recepciona y revisa; el Coordinador registra el resultado: conforme, observado o con mejoras sujetas a no objeción.
+6. Si está conforme, el Especialista inicia la indagación de mercado. Locación requiere una cotización válida; los demás objetos requieren dos o más, salvo excepción validada.
+7. Las consultas u observaciones de mercado retornan al Área usuaria. Si la respuesta modifica el TDR, se genera una nueva versión, el Jefe vuelve a firmarla y se remite a la DEC mediante SGD.
+8. El Área usuaria valida técnicamente la cotización u ofertas. Si no cumplen, la indagación se reinicia.
+9. El Coordinador confirma al proveedor seleccionado:
+   - Con una sola cotización de Locación no se genera el Anexo 8.
+   - Con dos o más cotizaciones válidas se genera y suscribe el **Anexo 8 — Cuadro de Cotizaciones**.
+10. El Coordinador registra la solicitud de CCP o previsión en SIAF WEB y la remite por SGD a OPP / Unidad de Presupuesto.
+11. OPP puede aprobar o observar. Si observa, devuelve a la DEC para corregir y solicitar nuevamente. Si aprueba, remite la CCP o previsión a la DEC.
+12. El Especialista recepciona la CCP; el Coordinador verifica la integridad del expediente y lo deja listo para perfeccionamiento.
+13. El Jefe de Abastecimiento emite la orden: OC para bienes y OS para servicios, consultorías o Locación.
+14. El Especialista notifica la orden al proveedor por correo institucional, con copia al Jefe del Área usuaria, y finaliza el flujo.
+
+#### Observación y subsanación
+
+- OA o la DEC pueden observar el expediente.
+- El Área usuaria primero recepciona la observación y después abre la subsanación integral.
+- La subsanación puede corregir los datos generales, pedidos SIGA, Anexo 5 y documento técnico; no se limita al pedido inicialmente seleccionado.
+- Si se modifica un anexo firmado, se invalida la firma anterior y se exige una nueva firma del Jefe.
+- Para la ruta de Abastecimiento, la subsanación conserva el circuito Área usuaria → Jefe → OA → Unidad de Abastecimiento.
+- La falta de cotizaciones produce reiteraciones; después de los intentos simulados, el expediente puede retornar al Área usuaria para reformulación.
+
+El expediente conserva la etapa, los documentos y la trazabilidad al cambiar de perfil mientras la pestaña no se recargue.
 
 ### Ejecución
 
@@ -159,7 +232,8 @@ Tipos disponibles al crear según el perfil iniciador:
 - Requerimiento presentado al menos 10 días hábiles antes del inicio previsto.
 - Revisión y subsanación del requerimiento: hasta 2 días hábiles por etapa.
 - Cotización: hasta 3 días hábiles, ampliable según la naturaleza de la contratación.
-- Al menos 2 cotizaciones, salvo los supuestos de excepción descritos por la Directiva.
+- Al menos 2 cotizaciones, salvo los supuestos de excepción descritos por la Directiva. Para Locación de servicios de persona natural, el flujo implementado acepta una cotización válida.
+- El Anexo 8 se genera con dos o más cotizaciones válidas; no corresponde cuando la indagación concluye con una única cotización.
 - Consultas de mercado al Área usuaria: pronunciamiento en 1 día hábil; validación técnica en 2 días hábiles.
 - CCP/previsión presupuestal: atención en 1 día hábil.
 - Ampliación: solicitud dentro de los 10 días hábiles siguientes al hecho generador; evaluación y notificación dentro de los plazos normativos.
@@ -168,6 +242,33 @@ Tipos disponibles al crear según el perfil iniciador:
 - Penalidades por mora y otras penalidades: tope conjunto de 10%.
 - Pago: remisión a Contabilidad en 3 días hábiles; control previo y subsanación en 2 días hábiles; devengado y giro en SIAF-SP.
 - Resolución total/parcial, apercibimiento y notificación notarial o por PLADICOP según causal.
+
+## Línea base para elaborar casos de uso
+
+Una vez que los responsables funcionales aprueben esta versión de los flujos, los casos de uso deben derivarse de las acciones visibles en cada bandeja. Como mínimo, cada caso deberá identificar actor y subrol, precondiciones, estado de entrada, formulario o visor utilizado, validaciones, documentos generados, firma requerida, resultado, estado de salida, destinatario y rutas alternativas de observación o devolución.
+
+Los bloques funcionales previstos para esa siguiente etapa son:
+
+1. Autenticación y selección de perfil.
+2. Registro, firma, envío, observación y subsanación del Anexo 3 CMN.
+3. Revisión de OA y validación de Abastecimiento en CMN.
+4. Generación, firma, envío y recepción del Anexo 4 individual o consolidado.
+5. Registro y edición controlada del requerimiento con pedidos SIGA y evidencia CMN/presupuestal.
+6. Elaboración, versionado y firma de EETT/TDR y del Anexo 5.
+7. Revisión de OA y de la DEC, observación, subsanación y no objeción.
+8. Indagación, consultas, validación técnica y selección del proveedor.
+9. Generación o exclusión justificada del Anexo 8.
+10. Solicitud, observación, aprobación y recepción de CCP o previsión.
+11. Perfeccionamiento, emisión y notificación de OC/OS.
+
+### Decisiones que deben quedar aprobadas
+
+- Confirmar si el Anexo 4 CMN individual continuará permitido o si todo envío deberá ser consolidado desde dos solicitudes.
+- Confirmar qué subrol de Abastecimiento firma el Anexo 4 CMN y cómo se representa la segunda firma de la máxima autoridad administrativa.
+- Confirmar la desagregación interna de roles de DAI, actualmente representada como una sola DEC.
+- Confirmar el número máximo de propuestas del Anexo 5; el mockup usa el límite físico de cinco filas del formato.
+- Confirmar que la excepción de una cotización y la no generación del Anexo 8 aplican a toda Locación de persona natural bajo este flujo.
+- Confirmar si la notificación final debe copiar únicamente al Jefe del Área usuaria o también al Especialista responsable.
 
 ## Archivos
 
